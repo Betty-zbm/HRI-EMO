@@ -42,7 +42,7 @@ pip install -r requirements.txt
 |---|---|
 | `requirements.txt` | **Always.** This is the only file the server needs. It covers PyTorch, Whisper, WavLM/BERT, FastAPI and the GloVe reader. |
 | `requirements-server.txt` | Never. Deprecated alias that just points to `requirements.txt`, kept so old commands do not break. |
-| `requirements-mosei-offline.txt` | Only if you re-extract MOSEI features from the original CSD files for **training** (`scripts/mosei_feature_extraction_seq_level/`). It pulls in the CMU MultimodalSDK. **It is not needed to run the MOSEI checkpoints on the server**; the online MOSEI path uses COVAREP and GloVe instead (Section 6). |
+| `requirements-mosei-offline.txt` | Only if you re-extract MOSEI features from the original CSD files for **training** (`scripts/mosei_feature_extraction_seq_level/`). It pulls in the CMU MultimodalSDK. **It is not needed to run the MOSEI checkpoints on the server**; the online MOSEI path uses COVAREP and GloVe instead (Section 6). Note that the dataset-preparation scripts hold absolute paths to `ffmpeg` and `yt-dlp` on the development machine, near the top of each file, so edit those before rebuilding any features. |
 
 ### Do I need a GPU?
 
@@ -141,6 +141,10 @@ Notes:
   request downloads and loads several hundred MB and takes a few seconds. The
   first MOSEI request also loads the GloVe table and starts MATLAB, which can take
   several minutes. Later requests are fast.
+- **Whisper, WavLM and BERT download themselves.** Nothing has to be configured
+  for them. They land in the usual caches (`~/.cache/huggingface` and
+  `~/.cache/whisper`, or `%USERPROFILE%\.cache\...` on Windows), so budget the
+  disk space from Section 1 and expect the first run to need a network connection.
 - For auto-reload during development use `--reload --reload-dir server`. Do not use
   a bare `--reload`, which watches the virtual environment and reload-loops.
 - Stop with `Ctrl+C`. If you backgrounded it, use
@@ -155,7 +159,7 @@ Notes:
 
 | Tab | What it does |
 |---|---|
-| **Model Settings** | Pick the active checkpoint and the output format. Each card shows the labels, the metrics, the expected latency, and guidance on when to use it. Saved settings go to `server/runtime_settings.json` and apply to the next request, including requests from NAO. No restart needed. |
+| **Model Settings** | Pick the active checkpoint and the output format. Each card shows the labels, the metrics, the expected latency, and guidance on when to use it. Saved settings go to `server/runtime_settings.json`, which is gitignored and created the first time you save, so a fresh clone starts from the defaults. They apply to the next request, including requests from NAO. No restart needed. |
 | **Playground** | Record from your microphone in the browser, send it through the live pipeline, and see the transcript and the prediction. Use this to confirm the whole chain works before involving the robot. |
 | **NAO Integration** | Enter this machine's LAN IP and generate the Choregraphe script with the address already filled in, plus copy-paste setup steps. |
 
@@ -205,15 +209,24 @@ You need three things:
 3. `glove.840B.300d.txt` from [Stanford GloVe](https://nlp.stanford.edu/projects/glove/),
    about 2 GB uncompressed.
 
-Then set the paths in `server/config.py`. That file has a Windows branch and a
-macOS/Linux branch, so edit the one that matches your machine:
+Then tell the server where you put them, by editing `server/config.py`. **The
+paths committed in that file are the ones used while developing this project and
+will not exist on your machine.** Replace each one with wherever you actually
+cloned, installed or downloaded the item. The file has a Windows branch and a
+macOS/Linux branch, so edit the one that matches your machine and leave the other
+alone.
 
-| Variable | Meaning |
-|---|---|
-| `COVAREP_ROOT` | Path to the cloned COVAREP repository |
-| `COVAREP_RUNNER_BIN` | Path to the `matlab` executable, or `octave` |
-| `GLOVE_MODEL_PATH` | Path to `glove.840B.300d.txt` |
-| `COVAREP_TIMEOUT_SEC` | Raise this if the first MATLAB launch times out |
+| Variable | Set it to | Lines |
+|---|---|---|
+| `COVAREP_ROOT` | The directory you cloned COVAREP into | 75 (Windows) / 78 |
+| `COVAREP_RUNNER_BIN` | Your `matlab` executable, or just `octave` if it is on PATH | 76 (Windows) / 79 |
+| `GLOVE_MODEL_PATH` | The `glove.840B.300d.txt` file you downloaded | 88 (Windows) / 90 |
+| `COVAREP_TIMEOUT_SEC` | Leave at 120. Raise it if the first MATLAB launch times out | 82 |
+
+On macOS the MATLAB binary is inside the app bundle, for example
+`/Applications/MATLAB_R2026a.app/bin/matlab`. On Windows it is under
+`C:\Program Files\MATLAB\<release>\bin\matlab.exe`. These three variables are
+the only paths in the whole server that have to match your machine.
 
 Restart the server and reload the platform. The MOSEI cards should now be
 selectable. See [tools/covarep/README.md](../tools/covarep/README.md) for the
@@ -227,9 +240,16 @@ Open the **NAO Integration** tab, enter this machine's LAN IP, and generate the
 script. Paste it into a Python Script box in Choregraphe and wire the box to a
 trigger. The robot and the server must be on the same network.
 
+Generating the script is what fills in the server address: it rewrites
+`SERVER_HOST` and `SERVER_PORT` at the top of
+`server/nao_scripts/emotion_client.py` with the IP you entered. The copy committed
+in this repository still carries the address of the development machine, so use the
+generated script rather than the file on disk, or edit those two lines by hand if
+you would rather not open the platform.
+
 The generated script contains no model settings, so changing the checkpoint on the
-platform does not require regenerating it. Full details in
-[nao_scripts/README.md](nao_scripts/README.md).
+platform does not require regenerating it. Regenerate it only when the server
+address changes. Full details in [nao_scripts/README.md](nao_scripts/README.md).
 
 ---
 

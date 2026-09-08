@@ -61,17 +61,35 @@ pip install -U torch torchaudio --index-url https://download.pytorch.org/whl/cu1
 ## 3. Put the checkpoints in place
 
 Trained weights live in `runs/`, which is gitignored, so a fresh clone does not
-have them. Copy them from the machine that trained them, or retrain with the
-scripts in `scripts/fusion/`. The server expects exactly these paths, relative to
-the repository root:
+have them. Download them from the Releases page of this repository and unpack the
+archive **at the repository root**:
+
+```bash
+curl -L -o checkpoints.tar.gz \
+  https://github.com/Betty-zbm/HRI-EMO-NAO-PIPELINE/releases/latest/download/checkpoints.tar.gz
+tar -xzf checkpoints.tar.gz
+rm checkpoints.tar.gz
+```
+
+The archive is about 107 MB and already carries the directory structure, so it
+creates exactly the paths the server expects:
 
 ```
 runs/iemocap_4cls_seed7777/best_fusion_seq_decoder.pt
 runs/meld_4cls_wavlm_bert/best_fusion_seq_decoder.pt
 runs/meld_sentiment_wavlm_bert/best_fusion_seq_decoder.pt
-runs/mosei_6cls_v3/best_mosei_6cls.pt
+runs/mosei_fusion_decoder_v2/best_mosei_fusion_decoder.pt
 runs/mosei_sentiment/best_mosei_sentiment.pt
 ```
+
+These paths are read from `server/checkpoint_registry.py` and are not
+configurable, so unpack the archive at the repository root rather than moving the
+files by hand. Three of the five files share the name
+`best_fusion_seq_decoder.pt` and are told apart only by their directory.
+
+To confirm the download, `shasum -a 256 checkpoints.tar.gz` (macOS and Linux) or
+`certutil -hashfile checkpoints.tar.gz SHA256` (Windows) should print the checksum
+listed on the release.
 
 The paths are declared in `server/checkpoint_registry.py`. A checkpoint whose file
 is missing still appears on the platform, but is marked unavailable with the

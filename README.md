@@ -54,11 +54,25 @@ To check the whole chain in one click, without a microphone:
 **http://localhost:8000/platform?demo=1#playground** — it sends a built-in clip
 through the pipeline and shows the transcript and the prediction.
 
-Trained weights live in `runs/`, which is gitignored, so a fresh clone does not
-have them. A checkpoint whose file is missing is shown as unavailable on the
-platform and the rest keeps working. Full setup, including the optional MATLAB
-and GloVe requirements for the MOSEI models, is in
-**[server/README.md](server/README.md)**.
+### Checkpoints
+
+Trained weights are not in the repository. Download the archive from the
+[Releases page](https://github.com/Betty-zbm/HRI-EMO-NAO-PIPELINE/releases) and
+unpack it **at the repository root**, which puts every file where the server
+expects it:
+
+```bash
+curl -L -o checkpoints.tar.gz \
+  https://github.com/Betty-zbm/HRI-EMO-NAO-PIPELINE/releases/latest/download/checkpoints.tar.gz
+tar -xzf checkpoints.tar.gz && rm checkpoints.tar.gz
+```
+
+The paths are fixed in `server/checkpoint_registry.py`, so unpack the archive
+rather than moving the files by hand. A checkpoint whose file is missing is shown
+as unavailable on the platform and the rest keeps working.
+
+Full setup, including the optional MATLAB and GloVe requirements for the MOSEI
+models, is in **[server/README.md](server/README.md)**.
 
 ## Checkpoints
 

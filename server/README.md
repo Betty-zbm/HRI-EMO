@@ -61,18 +61,28 @@ pip install -U torch torchaudio --index-url https://download.pytorch.org/whl/cu1
 ## 3. Put the checkpoints in place
 
 Trained weights live in `runs/`, which is gitignored, so a fresh clone does not
-have them. Download them from the Releases page of this repository and unpack the
-archive **at the repository root**:
+have them. They are published as `checkpoints.tar.gz` on the
+[Releases page](https://github.com/HURON-Lab/HRI-EMO-NAO-PIPELINE/releases) of this
+repository. Download it while signed in to a GitHub account with access, put it in
+the repository root, and unpack it there:
 
 ```bash
-curl -L -o checkpoints.tar.gz \
-  https://github.com/Betty-zbm/HRI-EMO-NAO-PIPELINE/releases/latest/download/checkpoints.tar.gz
 tar -xzf checkpoints.tar.gz
 rm checkpoints.tar.gz
 ```
 
-The archive is about 107 MB and already carries the directory structure, so it
-creates exactly the paths the server expects:
+If you have the GitHub CLI, this does both steps without leaving the terminal:
+
+```bash
+gh release download --repo HURON-Lab/HRI-EMO-NAO-PIPELINE --pattern checkpoints.tar.gz
+tar -xzf checkpoints.tar.gz && rm checkpoints.tar.gz
+```
+
+This repository is private, so a plain `curl` of the release URL will fail with a
+404 unless you pass a token. Downloading in the browser or through `gh` is simpler.
+
+The archive is about 107 MB and already carries the directory structure, so
+unpacking it at the repository root creates exactly the paths the server expects:
 
 ```
 runs/iemocap_4cls_seed7777/best_fusion_seq_decoder.pt

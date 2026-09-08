@@ -56,14 +56,12 @@ through the pipeline and shows the transcript and the prediction.
 
 ### Checkpoints
 
-Trained weights are not in the repository. Download the archive from the
-[Releases page](https://github.com/Betty-zbm/HRI-EMO-NAO-PIPELINE/releases) and
-unpack it **at the repository root**, which puts every file where the server
-expects it:
+Trained weights are not in the repository. `checkpoints.tar.gz` is published on the
+[Releases page](https://github.com/HURON-Lab/HRI-EMO-NAO-PIPELINE/releases).
+Download it while signed in to an account with access, then unpack it **at the
+repository root**, which puts every file where the server expects it:
 
 ```bash
-curl -L -o checkpoints.tar.gz \
-  https://github.com/Betty-zbm/HRI-EMO-NAO-PIPELINE/releases/latest/download/checkpoints.tar.gz
 tar -xzf checkpoints.tar.gz && rm checkpoints.tar.gz
 ```
 
